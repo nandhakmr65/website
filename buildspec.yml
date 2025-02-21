@@ -1,0 +1,30 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      docker: 19
+    commands:
+      - echo "Installing Dependencies"
+      - apt-get update
+      - apt-get install -y docker.io
+
+  pre_build:
+    commands:
+      - echo "Starting Pre-Build Phase"
+      - aws ecr get-login-password --region us-west-1 | docker login --username AWS --password-stdin <account_id>.dkr.ecr.us-west-1.amazonaws.com
+
+  build:
+    commands:
+      - echo "Building Docker Image"
+      - docker build -t webapp .
+
+  post_build:
+    commands:
+      - echo "Build Completed"
+      - echo "Pushing Docker Image"
+      - docker push <account_id>.dkr.ecr.us-west-1.amazonaws.com/webapp:latest
+
+artifacts:
+  files:
+    - '**/*'
